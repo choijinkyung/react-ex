@@ -2,11 +2,16 @@ import path from 'path';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import webpack, { Configuration as WebpackConfiguration } from "webpack";
 import { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
+
+interface Configuration extends WebpackConfiguration {
+  devServer?: WebpackDevServerConfiguration;
+}
+
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-const config: webpack.Configuration = {
+const config: Configuration = {
   name: 'sleact',
   mode: isDevelopment ? 'development' : 'production',
   devtool: isDevelopment ? 'hidden-source-map' : 'inline-source-map',
@@ -34,7 +39,7 @@ const config: webpack.Configuration = {
             [
               '@babel/preset-env',
               {
-                targets: { browsers: ['IE 10','last 2 chrome versions','IE 11'] },
+                targets: { browsers: ['IE 10'] },
                 debug: isDevelopment,
               },
             ],
@@ -70,17 +75,17 @@ const config: webpack.Configuration = {
     publicPath: '/dist/',
   },
   devServer: {
-    historyApiFallback: true,
+    historyApiFallback: true, //url처럼 쓸 수 있게 가짜url을 쓸 수 있게함
     port: 3090,
     devMiddleware: { publicPath: '/dist/' },
-    hot:true
-  //   proxy: {
-  //     '/api/': {
-  //       target: 'http://localhost:3095',
-  //       changeOrigin:true,
-
-  //     }
-  //  }
+    static: { directory: path.resolve(__dirname) },
+    proxy: {
+      '/api/': {
+        target: 'http://localhost:3095',
+        changeOrigin:true
+        
+      }
+    }
   },
 };
 
@@ -93,8 +98,6 @@ if (isDevelopment && config.plugins) {
   }));
 }
 if (!isDevelopment && config.plugins) {
-  config.plugins.push(new webpack.LoaderOptionsPlugin({ minimize: true }));
-  // config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
 }
 
 export default config;
