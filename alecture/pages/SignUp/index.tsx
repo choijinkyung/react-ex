@@ -2,12 +2,12 @@ import React, { useState, useCallback } from 'react'
 import { Header, Form, Label, Input, LinkContainer, Button, Error, Success } from './styles'
 import useInput from '@hooks/useInput'
 import axios from "axios"
-import { Link, Routes, Route, Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import useSWR from 'swr'
 import fetcher from '@utils/fetcher'
 
 const SignUp = () => {
-  const { data, error } = useSWR('http://localhost:3095/api/users', fetcher);
+  const { data } = useSWR('http://localhost:3095/api/users', fetcher);
 
   const [email, onChangeEmail] = useInput('')
   const [nickname, onChangeNickname] = useInput('')
@@ -55,11 +55,17 @@ const SignUp = () => {
 
   }, [email, nickname, password, passwordCheck, mismatchError])
 
-
+  if (data === undefined) {
+    return (
+      <div>
+        로딩중 ...
+      </div>
+    )
+  }
   if (data) {
     return (
       <>
-        {< Navigate to="/login" replace />}
+        {< Navigate to="/workspace/sleact/channel/일반" replace />}
       </>
     )
   }

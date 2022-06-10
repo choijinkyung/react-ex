@@ -13,32 +13,34 @@ interface Props{
   show: boolean;
   onCloseModal: () => void;
   closeButton?: boolean;
-  setShowCreateChannelModal: (flag: boolean) => void;
+  setShowInviteWorkspaceModal: (flag: boolean) => void;
 }
 
-const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChannelModal }) => {
-  const [newChannel, onChangeNewChannel, setNewChannel] = useInput('');
+const InviteWorkspaceModal: VFC<Props> = ({ show, onCloseModal, setShowInviteWorkspaceModal }) => {
+  const [newMember, onChangeNewMember, setNewMember] = useInput('');
   const { workspace, channel } = useParams<{ workspace: string; channel: string }>();
 
-  const { data: userData } = useSWR<IUser | false>('http://localhost:3095/api/users', fetcher);
+  const { data: userData } = useSWR<IUser | false>('/api/users', fetcher);
 
-  const { data: channelData, mutate:revalidateChannel } = useSWR<IChannel[]>(userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null, fetcher);
+  const { mutate:revalidateMember } = useSWR<IChannel[]>(userData ? `/api/workspaces/${workspace}/members` : null, fetcher);
   
-  const onCreateChannel = useCallback((e: any) => {
+  const onInviteMember = useCallback((e: any) => {
     e.preventDefault();
-    axios.post(`/api/workspaces/${workspace}/channels`, {
-      name: newChannel,      
+    if (!newMember || !newMember.trim()) return;
+
+    axios.post(`/api/workspaces/${workspace}/members`, {
+      email: newMember,      
     },
       { withCredentials: true }
-    ).then(() => {
-      setShowCreateChannelModal(false);
-      revalidateChannel();
-      setNewChannel('');
+    ).then((response) => {
+      revalidateMember();
+      setShowInviteWorkspaceModal(false);
+      setNewMember('')
     }).catch((error) => {
       toast.error(error.response?.data, { position: 'bottom-center' });
       console.dir(error);
     })
-  }, [newChannel]);
+  }, [workspace, newMember]);
   
   if (!show) {
     return null;
@@ -46,10 +48,10 @@ const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChann
   
   return (
       <Modal show={show} onCloseModal={onCloseModal}>
-        <form onSubmit={onCreateChannel}>
-          <label id="channel-label">
-            <span> channel name</span>
-            <Input id ="channel" onChange={onChangeNewChannel} value={newChannel}/>
+        <form onSubmit={onInviteMember}>
+          <label id="member-label">
+            <span>E-mail</span>
+            <Input id ="member" onChange={onChangeNewMember} value={newMember}/>
           </label>      
           <Button type="submit">생성하기</Button>
         </form>
@@ -57,4 +59,4 @@ const CreateChannelModal: VFC<Props> = ({ show, onCloseModal, setShowCreateChann
   )
 }
 
-export default CreateChannelModal;
+export default InviteWorkspaceModal;

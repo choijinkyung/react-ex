@@ -1,13 +1,13 @@
 import useInput from '@hooks/useInput';
-import { Success, Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
+import { Form, Error, Label, Input, LinkContainer, Button, Header } from '@pages/SignUp/styles';
 import fetcher from '@utils/fetcher';
 import axios from 'axios';
 import React, { useCallback, useState } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import useSWR from 'swr';
 
 const LogIn = () => {
-  const { data: userData, error, mutate } = useSWR('http://localhost:3095/api/users', fetcher, {
+  const { data: userData, error, mutate } = useSWR('/api/users', fetcher, {
     dedupingInterval: 10000
   });
   const [logInError, setLogInError] = useState(false);
@@ -39,10 +39,9 @@ const LogIn = () => {
 
 
   if (!error && userData) {
-    console.log('로그인 성공', userData);
     return (
       <>
-        <Navigate to="/workspace/channel" replace />
+        <Navigate to="/workspace/sleact/channel/일반" replace />
       </>
     );
   }
